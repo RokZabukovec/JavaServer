@@ -26,7 +26,7 @@ In return we receive a sum of all three numbers:
 2. number of words in a txt file 
 3. and the user input number
 
-### Server
+## Server process
 Server handles all messages and counts all the numbers.
 
 **Take in  the considiration that the original program was written in my native language ( Slovene )**
