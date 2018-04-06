@@ -5,7 +5,7 @@ import java.util.*;
 public class Client {
 
 	public static void main(String[] args) throws IOException {
-		// ------  Izpis število vrstic iz url-ja  ----------
+		// ------  connecting to url  ----------
 		URL url = new URL("https://www.fis.unm.si/si/");
 		URLConnection open = url.openConnection();
 		String datoteka = "vsebina.txt";
@@ -24,32 +24,32 @@ public class Client {
 		System.out.println("Povezal sem se na naslov " + url + ", prebral sem vsebino in jo zapisal v datoteko "
 				+ datoteka + " in zapisal " + counter + " število vrstic.");
 
-		// ------------------------  UDP povezava ---------------------------
+		// ------------------------  UDP connection ---------------------------
 		// ------------------------------------------------------------------
 
 		int UDPport = 2227;
 		String server = "localhost";
 
 		try {
-			// --------  ustvari Socket  ------------------------------------
+			// --------  create Socket  ------------------------------------
 			DatagramSocket vticnica = new DatagramSocket();
 
-			// --------  za pridobivanja naslova serverja--------------------
+			// -------- getting server address --------------------
 			InetAddress IP = InetAddress.getByName(server);
 
-			// --------  število pretvori v string in nato v byte-e----------
+			// --------  convert number to string and then in bytes ----------
 			byte[] sendBuffer = new byte[1024];
 			sendBuffer = Integer.toString(counter).getBytes();
-			// -------- PAKET -----------------------------------------------
-			// -------- pošiljanje ------------------------------------------
+			// -------- PACKET -----------------------------------------------
+			// -------- sending ------------------------------------------
 			DatagramPacket outPaket = new DatagramPacket(sendBuffer, sendBuffer.length, IP, UDPport);
 			vticnica.send(outPaket);
 			System.out.println("Podatke so poslani...");
 
-			// -------- sprejemanje -----------------------------------------
+			// -------- receiving -----------------------------------------
 			byte[] receiveBuffer = new byte[1024];
 			DatagramPacket inPaket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-			// -------- čas za sprejem paketa -------------------------------
+			// -------- setting socket timeout -------------------------------
 			vticnica.setSoTimeout(10000);
 			vticnica.receive(inPaket);
 			String prejeto = new String(inPaket.getData());
@@ -70,7 +70,7 @@ public class Client {
 		// -----------------------  TCP  ------------------------------------
 		// ------------------------------------------------------------------
 
-		// trenutna nit zaspi za 1s
+		// current thread sleeps for min of 5ms
 		try {
 			Thread.sleep(5);
 		} catch (InterruptedException ex) {
@@ -91,10 +91,10 @@ public class Client {
 			System.exit(1);
 		}
 
-		// Za komunikacijo s streznikom
+		// server communication
 		BufferedReader input = new BufferedReader(new InputStreamReader(TCPSocket.getInputStream()));
 		PrintWriter output = new PrintWriter(TCPSocket.getOutputStream(), true);
-
+		// getting txt file and counting words in it
 		try (Scanner sc = new Scanner(new FileInputStream("xanadu.txt"))) {
 			int count = 0;
 			while (sc.hasNext()) {
@@ -106,12 +106,15 @@ public class Client {
 			}
 			String countString = Integer.toString(count);
 			output.println(countString);
-			String sprejemOdgovora;
+			String sprejemOdgovora; 
+			// reading server ACK
 			sprejemOdgovora = input.readLine();
 
 			if (sprejemOdgovora.equals("11")) {
 				System.out.println("Prejel sem potrdilno sporočilo.");
 			}
+			
+			//user inputs a number for calculating sum
 			Scanner vnos = new Scanner(System.in);
 			System.out.println("Vnesi celo številko");
 			int stevilka = vnos.nextInt();
@@ -120,6 +123,7 @@ public class Client {
 			vnos.close();
 
 		}
+		// STREAMS MUST BE CLOSED!
 		in.close();
 		out.close();
 		TCPSocket.close();
